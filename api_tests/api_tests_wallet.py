@@ -1,7 +1,4 @@
-import unittest
-import string
-import random
-import time
+import unittest, string, random, time
 
 from nose.plugins.attrib import attr
 
@@ -20,7 +17,7 @@ class ApiTestsWallet(unittest.TestCase):
         self.first_address = self.wallet_api_objects.import_address_by_secret(self.data['factoid_wallet_address'])
         self.second_address = self.wallet_api_objects.generate_factoid_address()
         self.ecrate = self.api_objects.get_entry_credits_rate()
-        self.entry_creds_wallet2 = self.wallet_api_objects.import_address_by_secret(self.data['ec_wallet_address'])
+        self.entry_creds_wallet = self.wallet_api_objects.import_address_by_secret(self.data['ec_wallet_address'])
         self.entry_creds_wallet2 = self.wallet_api_objects.generate_ec_address()
 
     def test_allocate_funds_to_factoid_wallet_address(self):
@@ -92,9 +89,17 @@ class ApiTestsWallet(unittest.TestCase):
 
         self.wallet_api_objects.create_new_transaction(transaction_name)
         self.wallet_api_objects.add_input_to_transaction(transaction_name, self.first_address, 100000000)
-        self.wallet_api_objects.add_entry_credit_output_to_transaction(transaction_name, self.second_address, 100000000)
-        self.wallet_api_objects.subtract_fee_from_transaction(transaction_name, self.second_address)
+        self.wallet_api_objects.add_entry_credit_output_to_transaction(transaction_name, self.entry_creds_wallet, 100000000)
+        self.wallet_api_objects.add_fee_to_transaction(transaction_name, self.first_address)
         self.wallet_api_objects.sign_transaction(transaction_name)
         transaction = self.wallet_api_objects.compose_transaction(transaction_name)
-        self.assertTrue("Successfully submitted" in self.api_objects.submit_factoid_by_transaction(transaction)['message'])
+        tx_id = self.api_objects.submit_factoid_by_transaction(transaction)['txid']
+        print 'tx_id', tx_id
+        self.assertIn("Successfully submitted", self.api_objects.submit_factoid_by_transaction(transaction)['message'], "Transaction failed")
+        for x in range(0, self.data['BLOCKTIME']):
+            pending = self.api_objects.get_pending_transactions(self.first_address)
+            if 'TransactionACK' in str(pending):
+                if tx_id in pending[0]['TransactionID']: break
+            time.sleep(1)
+        self.assertLess(x, self.data['BLOCKTIME'], 'Transaction never pending')
 

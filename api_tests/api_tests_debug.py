@@ -5,7 +5,7 @@ from helpers.helpers import read_data_from_json
 from nose.plugins.attrib import attr
 
 @attr(api=True)
-class FactomDebugAPItests(unittest.TestCase):
+class APITestsDebug(unittest.TestCase):
 
     def setUp(self):
         self.factomd_debug_api = ApiObjectsDebug()

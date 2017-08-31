@@ -8,7 +8,7 @@ from helpers.helpers import read_data_from_json
 from nose.plugins.attrib import attr
 
 @attr(api=True)
-class APIEntriesTests(unittest.TestCase):
+class APITestsChains(unittest.TestCase):
 
     def setUp(self):
         self.factom_api = APIObjectsFactomd()

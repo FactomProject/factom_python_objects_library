@@ -147,8 +147,8 @@ class APIObjectsFactomd():
     def get_pending_transactions(self, *address):
         '''
         Gets pending transaction
-        :param address: wallet address
-        :return: list with transaction ids and statuses
+        :param address: optional wallet address
+        :return: Transaction IDs, Statuses, Inputs, Outputs, ECOutputs, Fees
         '''
 
         if address:
@@ -209,8 +209,9 @@ class APIObjectsFactomd():
         :return:
         '''
         blocks = json.loads(self.send_get_request_with_params_dict('factoid-submit', {'transaction':
-                                                                                             transaction})[0])
-        return blocks['result']
+                                                                                          transaction})[0])
+        return blocks
+        # return blocks['result']
 
     def commit_chain_by_message(self, message):
         '''
